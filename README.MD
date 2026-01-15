@@ -64,12 +64,23 @@ Password: admin123
 
  Integration with Hospital Management Systems (HMS)
 
-# Contributors
+# Contributors /GROUP MEMBERS
 https://github.com/obsa-sufian
-# Lalise-Abera
-# Umer-jemal
-# Nanet-Buzayo
-# Matheos-Million
+
+# STUDENT.               IDNo
+
+# 1. OBSA SUFIAN.      DDU1600605
+
+# 2. UMAR JEMAL.        DDU16OO730
+
+# 3. MATHEOS MILLION.  DDU1600495
+
+# 4. NANET BUZAYO.     RMD1963
+
+# 5. LALISE ABERA.      RMD1506
+
+
+
 
 
 
