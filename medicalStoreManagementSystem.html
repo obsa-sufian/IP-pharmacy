@@ -1,0 +1,860 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Pharmacy Store Management System</title>
+<style>
+  :root{
+    --bg: #f6f8fb;
+    --panel: #ffffff;
+    --text: #1f2937;
+    --muted: #6b7280;
+    --primary: #6d5dfc;
+    --primary-2: #764ba2;
+    --danger: #ef4444;
+    --warn: #f59e0b;
+    --success: #10b981;
+    --border: #e5e7eb;
+    --card-grad: linear-gradient(135deg, #6d5dfc 0%, #764ba2 100%);
+  }
+  body.dark{
+    --bg: #0f172a;
+    --panel: #0b1220;
+    --text: #e5e7eb;
+    --muted: #9aa4b2;
+    --primary: #8b7bff;
+    --primary-2: #9b7bff;
+    --danger: #fb7185;
+    --warn: #fbbf24;
+    --success: #34d399;
+    --border: #1f2a44;
+    --card-grad: linear-gradient(135deg, #8b7bff 0%, #9b7bff 100%);
+  }
+
+  *{box-sizing:border-box}
+  html,body{height:100%}
+  body{
+    margin:0;
+    font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, Arial, "Apple Color Emoji","Segoe UI Emoji";
+    background: var(--bg);
+    color: var(--text);
+  }
+  .app{
+    display:grid;
+    grid-template-columns: 260px 1fr;
+    min-height:100vh;
+  }
+  /* Sidebar */
+  .sidebar{
+    background: var(--panel);
+    border-right:1px solid var(--border);
+    padding:20px 16px;
+    position:sticky; top:0; height:100vh;
+    display:flex; flex-direction:column; gap:16px;
+  }
+  .brand{
+    display:flex; align-items:center; gap:12px; padding:8px 10px; border-radius:12px;
+    background: var(--card-grad); color:#fff; box-shadow: 0 8px 30px rgba(0,0,0,.15);
+  }
+  .brand .logo{
+    width:40px; height:40px; background: rgba(255,255,255,.2);
+    border-radius:10px; display:grid; place-items:center; font-weight:800;
+  }
+  .nav{
+    display:flex; flex-direction:column; gap:8px; margin-top:8px;
+  }
+  .nav button{
+    width:100%; text-align:left; padding:12px 14px; border-radius:10px; border:1px solid var(--border);
+    background:transparent; color:var(--text); cursor:pointer; font-weight:600; display:flex; align-items:center; gap:10px;
+    transition:transform .15s ease, background .2s ease, border-color .2s ease;
+  }
+  .nav button:hover{ transform: translateY(-1px); border-color: var(--primary) }
+  .nav button.active{ background: rgba(109,93,252,.12); border-color: var(--primary); color: var(--primary) }
+  .grow{ flex:1 }
+  .toggle{
+    display:flex; align-items:center; justify-content:space-between; gap:10px; padding:10px 12px; border-radius:10px; border:1px solid var(--border);
+  }
+  .switch{
+    width:48px; height:28px; background:#d1d5db; border-radius:999px; position:relative; cursor:pointer;
+  }
+  body.dark .switch{ background:#334155 }
+  .switch::after{
+    content:""; position:absolute; width:22px; height:22px; background:#fff; border-radius:50%; top:3px; left:3px; transition:left .2s ease;
+  }
+  body.dark .switch::after{ left:23px }
+
+  /* Main */
+  .main{
+    padding:26px 28px;
+  }
+  .header{
+    display:flex; align-items:center; justify-content:space-between; gap:16px; margin-bottom:22px;
+  }
+  .h-title{ font-size:1.6rem; font-weight:800 }
+  .stats{
+    display:grid; grid-template-columns: repeat(4, minmax(180px,1fr)); gap:16px; margin-bottom:20px;
+  }
+  .card{
+    background: var(--panel); border:1px solid var(--border); border-radius:16px; padding:18px;
+    box-shadow:0 10px 30px rgba(0,0,0,.06);
+  }
+  .metric{
+    display:flex; align-items:center; justify-content:space-between;
+  }
+  .metric .num{ font-size:2rem; font-weight:800 }
+  .metric .pill{ padding:6px 10px; border-radius:999px; font-size:.85rem; border:1px solid var(--border); color: var(--muted) }
+
+  /* Alerts */
+  .alerts{ margin-bottom:16px; display:grid; gap:12px }
+  .alert{
+    display:flex; gap:12px; align-items:flex-start; padding:14px 16px; border-radius:12px; border:1px solid var(--border);
+    background: linear-gradient(0deg, transparent, transparent), var(--panel);
+  }
+  .alert.warn{ border-color: rgba(245,158,11,.35); background: rgba(245,158,11,.08) }
+  .alert.good{ border-color: rgba(16,185,129,.35); background: rgba(16,185,129,.08) }
+  .alert .icon{ font-size:1.2rem }
+  .alert strong{ display:block }
+
+  /* Tabs within main view */
+  .tabs{ display:flex; gap:8px; margin:10px 0 18px }
+  .tabs button{
+    padding:10px 14px; border-radius:10px; border:1px solid var(--border); background:transparent; cursor:pointer; font-weight:600; color:var(--muted)
+  }
+  .tabs button.active{ background: rgba(109,93,252,.12); color: var(--primary); border-color: var(--primary) }
+
+  /* Inventory grid */
+  .grid{
+    display:grid; gap:16px;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  }
+  .med{
+    position:relative;
+    border-left:6px solid var(--primary);
+  }
+  .med.low{ border-left-color: var(--warn) }
+  .med.out{ border-left-color: var(--danger) }
+  .med.exp{ border-left-color: var(--danger); background: linear-gradient(135deg, rgba(239,68,68,.08), transparent) }
+  .med .ttl{ font-weight:800; font-size:1.1rem; margin-bottom:4px }
+  .med .line{ color: var(--muted); font-size:.92rem; margin:2px 0 }
+  .med .chip{
+    display:inline-block; margin-top:8px; padding:4px 10px; border-radius:999px; font-size:.8rem; font-weight:700
+  }
+  .chip.ok{ background: rgba(16,185,129,.15); color:#059669 }
+  .chip.low{ background: rgba(245,158,11,.15); color:#b45309 }
+  .chip.out{ background: rgba(239,68,68,.15); color:#b91c1c }
+  .badge{
+    position:absolute; top:-10px; right:-10px; width:32px; height:32px; border-radius:50%; background: var(--danger); color:#fff; display:grid; place-items:center; font-size:14px
+  }
+
+  /* Forms */
+  .form{
+    display:grid; gap:12px; background: var(--panel); border:1px solid var(--border); border-radius:16px; padding:18px;
+  }
+  .row{ display:grid; gap:12px; grid-template-columns: repeat(2, 1fr) }
+  .row-3{ grid-template-columns: repeat(3, 1fr) }
+  .row-4{ grid-template-columns: repeat(4, 1fr) }
+  label{ font-weight:700; font-size:.92rem }
+  input,select,textarea{
+    width:100%; padding:12px 12px; border-radius:10px; border:1px solid var(--border);
+    background: transparent; color: var(--text); font-size: .95rem
+  }
+  textarea{ resize:vertical; min-height:70px }
+  .btn{
+    border:none; padding:12px 16px; border-radius:10px; font-weight:800; cursor:pointer;
+    background: var(--card-grad); color:#fff; transition: transform .15s ease, box-shadow .15s ease;
+  }
+  .btn:hover{ transform:translateY(-1px); box-shadow:0 10px 25px rgba(0,0,0,.15) }
+  .btn.ghost{ background:transparent; color: var(--primary); border:1px solid var(--primary) }
+  .btn.warn{ background: linear-gradient(135deg, #f59e0b, #f97316) }
+  .btn.danger{ background: linear-gradient(135deg, #ef4444, #f43f5e) }
+  .btn.muted{ background:transparent; color: var(--muted); border:1px solid var(--border) }
+
+  .toolbar{ display:flex; gap:10px; flex-wrap:wrap; align-items:center; margin-bottom:14px }
+  .search{ flex:1 }
+  .filters{ display:flex; gap:8px; flex-wrap:wrap }
+  .pill{
+    padding:8px 12px; border-radius:999px; border:1px solid var(--border); background:transparent; cursor:pointer; font-weight:700; color:var(--muted)
+  }
+  .pill.active{ border-color: var(--primary); color: var(--primary); background: rgba(109,93,252,.1) }
+
+  /* Billing */
+  .table{ width:100%; border-collapse:collapse; }
+  .table th,.table td{ padding:10px 8px; border-bottom:1px solid var(--border); text-align:left; font-size:.95rem }
+  .table th{ color: var(--muted); font-weight:800; }
+  .t-right{ text-align:right }
+  .totals{ display:grid; gap:8px; justify-content:end; margin-top:12px }
+  .totals .line{ display:grid; grid-template-columns: 140px 120px; gap:12px; align-items:center }
+
+  /* Toasts */
+  .toasts{ position: fixed; bottom:18px; right:18px; display:grid; gap:10px; z-index:9999 }
+  .toast{ padding:12px 14px; border-radius:10px; color:#fff; font-weight:700; box-shadow:0 10px 30px rgba(0,0,0,.25); animation: slideIn .25s ease }
+  .toast.ok{ background:#10b981 } .toast.warn{ background:#f59e0b } .toast.err{ background:#ef4444 }
+  @keyframes slideIn{ from{ transform: translateY(10px); opacity:0 } to{ transform: translateY(0); opacity:1 } }
+
+  /* Responsive */
+  @media (max-width:1000px){
+    .app{ grid-template-columns: 1fr }
+    .sidebar{ position:static; height:auto; }
+    .stats{ grid-template-columns: repeat(2, 1fr) }
+    .row,.row-3,.row-4{ grid-template-columns: 1fr }
+  }
+</style>
+</head>
+<body>
+<div class="app">
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="logo">M+</div>
+      <div>
+        <div style="font-weight:900; letter-spacing:.2px">Pharmacy</div>
+        <div style="opacity:.9; font-size:.85rem">Management System</div>
+      </div>
+    </div>
+
+    <div class="nav">
+      <button class="active" data-view="dashboard">🏠 Dashboard</button>
+      <button data-view="inventory">📦 Inventory</button>
+      <button data-view="add">➕ Add Medicine</button>
+      <button data-view="billing">🧾 Billing</button>
+    </div>
+
+    <div class="grow"></div>
+
+    <div class="toggle">
+      <span>🌙 Dark Mode</span>
+      <div id="modeSwitch" class="switch" title="Toggle theme"></div>
+    </div>
+    <button id="logoutBtn" class="btn danger" style="width:100%">Logout</button>
+  </aside>
+
+  <!-- Main -->
+  <main class="main">
+    <div class="header">
+      <div class="h-title">Welcome, Admin</div>
+      <div>
+        <button id="backupBtn" class="btn ghost">⤴️ Export Data</button>
+        <label for="restoreInput" class="btn muted" style="cursor:pointer">⤵️ Import Data</label>
+        <input id="restoreInput" type="file" accept="application/json" style="display:none"/>
+      </div>
+    </div>
+
+    <!-- Stats -->
+    <section id="stats" class="stats">
+      <div class="card metric">
+        <div>
+          <div class="num" id="statTotal">0</div>
+          <div class="pill">Total Medicines</div>
+        </div>
+        <div>💊</div>
+      </div>
+      <div class="card metric">
+        <div>
+          <div class="num" id="statExpiring">0</div>
+          <div class="pill">Expiring in 30 days</div>
+        </div>
+        <div>⏳</div>
+      </div>
+      <div class="card metric">
+        <div>
+          <div class="num" id="statLow">0</div>
+          <div class="pill">Low Stock (≤10)</div>
+        </div>
+        <div>⚠️</div>
+      </div>
+      <div class="card metric">
+        <div>
+          <div class="num" id="statOut">0</div>
+          <div class="pill">Out of Stock</div>
+        </div>
+        <div>❌</div>
+      </div>
+    </section>
+
+    <!-- Alerts -->
+    <div id="alerts" class="alerts"></div>
+
+    <!-- Tabs under dashboard: recent + quick actions -->
+    <div id="dashboardView">
+      <div class="tabs">
+        <button class="active" data-dtab="recent">Recent</button>
+        <button data-dtab="quick">Quick Actions</button>
+      </div>
+
+      <div id="recentTab" class="card">
+        <div style="font-weight:800; margin-bottom:10px">Recently Added</div>
+        <div id="recentContainer" class="grid"></div>
+      </div>
+
+      <div id="quickTab" class="card" style="display:none">
+        <div style="display:flex; gap:10px; flex-wrap:wrap">
+          <button class="btn" onclick="switchView('add')">➕ Add Medicine</button>
+          <button class="btn" onclick="switchView('inventory')">📦 View Inventory</button>
+          <button class="btn warn" onclick="filterExpiringSoon()">⏳ Expiring Soon</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Inventory -->
+    <section id="inventoryView" style="display:none">
+      <div class="toolbar">
+        <input id="searchBox" class="search" placeholder="Search by name, manufacturer, category, batch..." />
+        <div class="filters">
+          <button class="pill active" data-filter="all">All</button>
+          <button class="pill" data-filter="expiring">Expiring</button>
+          <button class="pill" data-filter="low">Low Stock</button>
+          <button class="pill" data-filter="out">Out of Stock</button>
+        </div>
+      </div>
+      <div class="toolbar">
+        <div class="filters">
+          <label style="display:flex; gap:6px; align-items:center">
+            From <input type="date" id="fromDate">
+          </label>
+          <label style="display:flex; gap:6px; align-items:center">
+            To <input type="date" id="toDate">
+          </label>
+          <button class="pill" id="applyDate">Apply Date Filter</button>
+          <button class="pill" id="clearDate">Clear</button>
+        </div>
+      </div>
+      <div id="invGrid" class="grid"></div>
+    </section>
+
+    <!-- Add/Edit -->
+    <section id="addView" style="display:none">
+      <form id="medForm" class="form">
+        <div style="display:flex; align-items:center; justify-content:space-between">
+          <div style="font-weight:900; font-size:1.1rem" id="formTitle">Add New Medicine</div>
+          <button type="button" id="resetFormBtn" class="btn muted">Reset</button>
+        </div>
+        <div class="row">
+          <div>
+            <label>Medicine Name *</label>
+            <input required id="f_name" />
+          </div>
+          <div>
+            <label>Manufacturer *</label>
+            <input required id="f_manu" />
+          </div>
+        </div>
+        <div class="row">
+          <div>
+            <label>Category *</label>
+            <select required id="f_cat">
+              <option value="">Select</option>
+              <option>Tablet</option><option>Capsule</option><option>Syrup</option>
+              <option>Injection</option><option>Cream/Ointment</option><option>Drop</option>
+              <option>Inhaler</option><option>Powder</option><option>Other</option>
+            </select>
+          </div>
+          <div>
+            <label>Strength/Dosage *</label>
+            <input required id="f_strength" placeholder="e.g., 500mg, 10ml" />
+          </div>
+        </div>
+        <div class="row">
+          <div>
+            <label>Quantity in Stock *</label>
+            <input required id="f_qty" type="number" min="0" />
+          </div>
+          <div>
+            <label>Price per Unit (birr) *</label>
+            <input required id="f_price" type="number" min="0" step="0.01"/>
+          </div>
+        </div>
+        <div class="row">
+          <div>
+            <label>Expiry Date *</label>
+            <input required id="f_exp" type="date"/>
+          </div>
+          <div>
+            <label>Batch Number *</label>
+            <input required id="f_batch"/>
+          </div>
+        </div>
+        <div>
+          <label>Description</label>
+          <textarea id="f_desc" placeholder="Notes or additional info..."></textarea>
+        </div>
+        <div style="display:flex; gap:10px; flex-wrap:wrap">
+          <button class="btn" type="submit">💾 Save</button>
+          <button class="btn ghost" type="button" id="cancelEdit" style="display:none">Cancel Edit</button>
+        </div>
+      </form>
+    </section>
+
+    <!-- Billing -->
+    <section id="billingView" style="display:none">
+      <div class="card" style="margin-bottom:14px">
+        <div style="font-weight:900; margin-bottom:10px">Create Bill</div>
+        <div class="row-4">
+          <div>
+            <label>Select Medicine</label>
+            <select id="billMed"></select>
+          </div>
+          <div>
+            <label>Available</label>
+            <input id="billAvail" readonly />
+          </div>
+          <div>
+            <label>Qty</label>
+            <input id="billQty" type="number" min="1" value="1"/>
+          </div>
+          <div style="display:flex; align-items:flex-end">
+            <button class="btn" id="addToCart">Add to Cart</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <table class="table" id="cartTable">
+          <thead>
+            <tr>
+              <th>#</th><th>Name</th><th>Batch</th><th class="t-right">Qty</th><th class="t-right">Price</th><th class="t-right">Amount</th><th></th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+        <div class="totals">
+          <div class="line"><div>Subtotal</div><div class="t-right" id="subTotal">birr 0.00</div></div>
+          <div class="line"><div>GST (5%)</div><div class="t-right" id="gst">birr 0.00</div></div>
+          <div class="line"><div style="font-weight:900">Total</div><div class="t-right" id="grandTotal" style="font-weight:900">birr 0.00</div></div>
+        </div>
+        <div style="margin-top:12px; display:flex; gap:10px; flex-wrap:wrap">
+          <button class="btn" id="finalize">Finalize & Deduct Stock</button>
+          <button class="btn muted" id="clearCart">Clear Cart</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Hidden login (demo) -->
+    <input type="hidden" id="username" value="admin"/>
+  </main>
+</div>
+
+<div class="toasts" id="toasts"></div>
+
+<script>
+  // ---------- Utilities ----------
+  const $ = sel => document.querySelector(sel);
+  const $$ = sel => Array.from(document.querySelectorAll(sel));
+  const fmt = n => "birr" + Number(n).toFixed(2);
+  const todayStr = () => new Date().toISOString().split('T')[0];
+
+  const toast = (msg, type="ok", t=2200) => {
+    const box = document.createElement('div');
+    box.className = `toast ${type}`;
+    box.textContent = msg;
+    $('#toasts').appendChild(box);
+    setTimeout(()=> box.remove(), t);
+  };
+
+  // ---------- Data layer (LocalStorage) ----------
+  const KEY = 'msms_medicines_v2';
+  const THEME = 'msms_theme';
+  let medicines = [];
+
+  const preload = [
+    {name:"Paracetamol", manu:"Sun Pharma", cat:"Tablet", strength:"500mg", qty:150, price:25, exp:"2026-08-30", batch:"PAR123", desc:"Pain relief and fever reducer"},
+    {name:"Amoxicillin", manu:"Cipla", cat:"Capsule", strength:"250mg", qty:8, price:150, exp:"2026-09-05", batch:"AMX456", desc:"Antibiotic"},
+    {name:"Cough Syrup", manu:"Ethiopamatical", cat:"Syrup", strength:"100ml", qty:25, price:850, exp:"2026-12-31", batch:"CS789", desc:"Cough relief"},
+    {name:"Vitamin D3", manu:"ethiodenk", cat:"Tablet", strength:"1000 IU", qty:0, price:52.00, exp:"2026-05-15", batch:"VD101", desc:"Supplement"},
+    {name:"Metformin", manu:"Dr. Reddy's", cat:"Tablet", strength:"500mg", qty:60, price:75, exp:"2026-03-20", batch:"MET222", desc:"Diabetes"},
+    {name:"Amlodipine", manu:"Lupin", cat:"Tablet", strength:"5mg", qty:12, price:20, exp:"2026-09-15", batch:"AML333", desc:"Hypertension"},
+    {name:"Omeprazole", manu:"Torrent", cat:"Capsule", strength:"20mg", qty:5, price:65, exp:"2026-08-28", batch:"OMP444", desc:"Acidity"},
+    {name:"Azithromycin", manu:"Zydus", cat:"Tablet", strength:"500mg", qty:20, price:220, exp:"2026-10-10", batch:"AZI555", desc:"Antibiotic"},
+    {name:"ORS Solution", manu:"FDC", cat:"Syrup", strength:"200ml", qty:40, price:180, exp:"2026-07-11", batch:"ORS666", desc:"Rehydration"},
+    {name:"Betadine Ointment", manu:"Win-Medicare", cat:"Cream/Ointment", strength:"10%", qty:9, price:60.0, exp:"2027-08-25", batch:"BTD777", desc:"Antiseptic"},
+    {name:"Insulin Glargine", manu:"Biocon", cat:"Injection", strength:"100 IU/ml", qty:3, price:450.0, exp:"2028-09-01", batch:"INS888", desc:"Insulin"},
+    {name:"Salbutamol Inhaler", manu:"Cipla", cat:"Inhaler", strength:"100 mcg", qty:14, price:220.0, exp:"2027-11-12", batch:"SAL999", desc:"Asthma relief"}
+  ].map((m,i)=> ({ id: Date.now()+i, added:new Date().toISOString(), ...m }));
+
+  function load() {
+    const raw = localStorage.getItem(KEY);
+    if(raw){ medicines = JSON.parse(raw); }
+    else { medicines = preload; save(); }
+  }
+  function save(){ localStorage.setItem(KEY, JSON.stringify(medicines)); }
+
+  // ---------- Theme ----------
+  function applyTheme(){
+    const t = localStorage.getItem(THEME) || 'light';
+    document.body.classList.toggle('dark', t==='dark');
+  }
+  function toggleTheme(){
+    const newT = document.body.classList.contains('dark') ? 'light' : 'dark';
+    localStorage.setItem(THEME,newT);
+    applyTheme();
+  }
+
+  // ---------- Helpers ----------
+  const daysTo = d => Math.ceil((new Date(d).setHours(0,0,0,0) - new Date().setHours(0,0,0,0)) / 86400000);
+  const isExpiringSoon = d => { const x=daysTo(d); return x>0 && x<=30; };
+  const isExpired = d => daysTo(d) <= 0;
+
+  // ---------- Rendering ----------
+  function updateStats(){
+    $('#statTotal').textContent = medicines.length;
+    $('#statExpiring').textContent = medicines.filter(m=>isExpiringSoon(m.exp)).length;
+    $('#statLow').textContent = medicines.filter(m=>m.qty>0 && m.qty<=10).length;
+    $('#statOut').textContent = medicines.filter(m=>m.qty===0).length;
+  }
+
+  function renderAlerts(){
+    const expiring = medicines.filter(m=>isExpiringSoon(m.exp));
+    const alerts = $('#alerts');
+    alerts.innerHTML = '';
+    if(expiring.length===0){
+      alerts.innerHTML = `<div class="alert good">
+        <div class="icon">✅</div>
+        <div><strong>No medicines expiring in next 30 days.</strong> Inventory looks healthy.</div>
+      </div>`;
+      return;
+    }
+    const list = expiring.slice(0,6).map(m=>`${m.name} (Batch ${m.batch}) in ${daysTo(m.exp)} day(s)`).join(' • ');
+    alerts.innerHTML = `<div class="alert warn">
+      <div class="icon">⏳</div>
+      <div><strong>${expiring.length} medicine(s) expiring in 30 days.</strong> ${list}${expiring.length>6?' • …':''}</div>
+    </div>`;
+  }
+
+  function cardClass(m){
+    if(isExpired(m.exp)) return 'med exp';
+    if(m.qty===0) return 'med out';
+    if(m.qty<=10) return 'med low';
+    return 'med';
+  }
+  function stockChip(m){
+    if(isExpired(m.exp)) return `<span class="chip out">Expired</span>`;
+    if(m.qty===0) return `<span class="chip out">Out of Stock</span>`;
+    if(m.qty<=10) return `<span class="chip low">Low Stock</span>`;
+    return `<span class="chip ok">In Stock</span>`;
+  }
+
+  function medCard(m){
+    const dd = daysTo(m.exp);
+    const badge = (isExpired(m.exp) ? '❌' : (isExpiringSoon(m.exp)?'⚠️':'')) || '';
+    return `<div class="card ${cardClass(m)}">
+      ${badge?`<div class="badge">${badge}</div>`:''}
+      <div class="ttl">${m.name}</div>
+      <div class="line"><strong>Manufacturer:</strong> ${m.manu}</div>
+      <div class="line"><strong>Category:</strong> ${m.cat} • <strong>Strength:</strong> ${m.strength}</div>
+      <div class="line"><strong>Batch:</strong> ${m.batch}</div>
+      <div class="line"><strong>Price:</strong> ${fmt(m.price)} • <strong>Qty:</strong> ${m.qty}</div>
+      <div class="line"><strong>Expiry:</strong> ${new Date(m.exp).toLocaleDateString()} ${(!isExpired(m.exp)?`• ${dd} day(s) left`:`• Expired`)}</div>
+      ${m.desc?`<div class="line">${m.desc}</div>`:''}
+      ${stockChip(m)}
+      <div style="display:flex; gap:8px; margin-top:10px; flex-wrap:wrap">
+        <button class="btn ghost" onclick="inc('${m.id}',1)">+1</button>
+        <button class="btn ghost" onclick="dec('${m.id}',1)">-1</button>
+        <button class="btn warn" onclick="startEdit('${m.id}')">Edit</button>
+        <button class="btn danger" onclick="delMed('${m.id}')">Delete</button>
+        <button class="btn" onclick="addToBillQuick('${m.id}')">Add to Bill</button>
+      </div>
+    </div>`;
+  }
+
+  function renderRecent(){
+    const container = $('#recentContainer');
+    const items = [...medicines].sort((a,b)=>b.id-a.id).slice(0,6);
+    container.innerHTML = items.map(m=>medCard(m)).join('') || `<div class="line">No medicines yet.</div>`;
+  }
+
+  // Inventory rendering with filters & search
+  let currentFilter = 'all';
+  let dateFilter = {from:null, to:null};
+  function renderInventory(list = null){
+    const grid = $('#invGrid');
+    let data = list || medicines.slice();
+
+    // Apply filter
+    if(currentFilter==='expiring') data = data.filter(m=>isExpiringSoon(m.exp));
+    else if(currentFilter==='low') data = data.filter(m=>m.qty>0 && m.qty<=10);
+    else if(currentFilter==='out') data = data.filter(m=>m.qty===0);
+
+    // Apply date range
+    if(dateFilter.from) data = data.filter(m=> new Date(m.exp) >= new Date(dateFilter.from));
+    if(dateFilter.to) data = data.filter(m=> new Date(m.exp) <= new Date(dateFilter.to));
+
+    // Search
+    const q = $('#searchBox').value.trim().toLowerCase();
+    if(q){
+      data = data.filter(m => [m.name,m.manu,m.cat,m.batch,(m.desc||'')]
+        .some(s => String(s).toLowerCase().includes(q)));
+    }
+
+    grid.innerHTML = data.length ? data.map(m=>medCard(m)).join('') :
+      `<div class="card" style="grid-column:1/-1; text-align:center">No medicines found.</div>`;
+  }
+
+  // ---------- Editing / CRUD ----------
+  let editingId = null;
+  function resetForm(){
+    editingId = null;
+    $('#formTitle').textContent = 'Add New Medicine';
+    $('#medForm').reset();
+    $('#f_exp').min = todayStr();
+    $('#cancelEdit').style.display='none';
+  }
+  function captureForm(){
+    const m = {
+      name: $('#f_name').value.trim(),
+      manu: $('#f_manu').value.trim(),
+      cat: $('#f_cat').value,
+      strength: $('#f_strength').value.trim(),
+      qty: Number($('#f_qty').value),
+      price: Number($('#f_price').value),
+      exp: $('#f_exp').value,
+      batch: $('#f_batch').value.trim(),
+      desc: $('#f_desc').value.trim()
+    };
+    return m;
+  }
+  function startEdit(id){
+    const m = medicines.find(x=>String(x.id)===String(id));
+    if(!m) return;
+    switchView('add');
+    editingId = m.id;
+    $('#formTitle').textContent = 'Edit Medicine';
+    $('#f_name').value = m.name;
+    $('#f_manu').value = m.manu;
+    $('#f_cat').value = m.cat;
+    $('#f_strength').value = m.strength;
+    $('#f_qty').value = m.qty;
+    $('#f_price').value = m.price;
+    $('#f_exp').value = m.exp;
+    $('#f_exp').min = todayStr();
+    $('#f_batch').value = m.batch;
+    $('#f_desc').value = m.desc || '';
+    $('#cancelEdit').style.display='inline-flex';
+  }
+  function delMed(id){
+    if(!confirm('Delete this medicine?')) return;
+    medicines = medicines.filter(m=>String(m.id)!==String(id));
+    save(); refreshAll(); toast('Deleted','err');
+  }
+  function inc(id, n){
+    const m = medicines.find(x=>String(x.id)===String(id)); if(!m) return;
+    m.qty += n; save(); refreshAll();
+  }
+  function dec(id, n){
+    const m = medicines.find(x=>String(x.id)===String(id)); if(!m) return;
+    m.qty = Math.max(0, m.qty - n); save(); refreshAll();
+  }
+
+  // ---------- Billing ----------
+  let cart = [];
+  function refreshBillSelect(){
+    const sel = $('#billMed');
+    sel.innerHTML = medicines.map(m=>`<option value="${m.id}">${m.name} • ${m.strength} • ${fmt(m.price)}</option>`).join('');
+    updateAvail();
+  }
+  function updateAvail(){
+    const id = $('#billMed').value;
+    const m = medicines.find(x=>String(x.id)===String(id));
+    $('#billAvail').value = m ? m.qty : '';
+  }
+  function addToBillQuick(id){
+    switchView('billing');
+    $('#billMed').value = String(id);
+    updateAvail();
+  }
+  function addItemToCart(){
+    const id = $('#billMed').value;
+    const qty = Math.max(1, Number($('#billQty').value));
+    const m = medicines.find(x=>String(x.id)===String(id));
+    if(!m) return;
+    if(qty > m.qty){ toast('Not enough stock','err'); return; }
+    const existing = cart.find(c=>c.id===m.id);
+    if(existing){
+      if(existing.qty + qty > m.qty){ toast('Not enough stock','err'); return; }
+      existing.qty += qty;
+    }else{
+      cart.push({ id:m.id, name:m.name, batch:m.batch, price:m.price, qty });
+    }
+    renderCart(); toast('Added to cart','ok');
+  }
+  function renderCart(){
+    const tb = $('#cartTable tbody');
+    tb.innerHTML = cart.map((c,i)=>`
+      <tr>
+        <td>${i+1}</td>
+        <td>${c.name}</td>
+        <td>${c.batch}</td>
+        <td class="t-right">
+          <input type="number" min="1" value="${c.qty}" style="width:70px"
+           onchange="updateCartQty(${i}, this.value)"/>
+        </td>
+        <td class="t-right">${fmt(c.price)}</td>
+        <td class="t-right">${fmt(c.price*c.qty)}</td>
+        <td><button class="btn danger" onclick="removeCart(${i})">Remove</button></td>
+      </tr>`).join('') || `<tr><td colspan="7" class="t-right">Cart empty</td></tr>`;
+    computeTotals();
+  }
+  function updateCartQty(i, val){
+    const item = cart[i]; if(!item) return;
+    val = Math.max(1, Number(val));
+    const stock = medicines.find(m=>m.id===item.id)?.qty ?? 0;
+    if(val>stock){ toast('Exceeds stock','err'); val=stock; }
+    item.qty = val; renderCart();
+  }
+  function removeCart(i){ cart.splice(i,1); renderCart(); }
+  function clearCart(){ cart = []; renderCart(); }
+  function computeTotals(){
+    const sub = cart.reduce((s,c)=> s + c.qty*c.price, 0);
+    const gst = sub * 0.05;
+    const tot = sub + gst;
+    $('#subTotal').textContent = fmt(sub);
+    $('#gst').textContent = fmt(gst);
+    $('#grandTotal').textContent = fmt(tot);
+  }
+  function finalizeBill(){
+    if(cart.length===0){ toast('Cart is empty','err'); return; }
+    // Deduct stock
+    for(const item of cart){
+      const m = medicines.find(x=>x.id===item.id);
+      if(!m) continue;
+      if(item.qty > m.qty){ toast(`Not enough ${m.name}`,'err'); return; }
+      m.qty -= item.qty;
+    }
+    save(); cart=[]; renderCart(); refreshAll(); toast('Bill finalized & stock updated','ok',2600);
+  }
+
+  // ---------- Views ----------
+  function switchView(view){
+    // Sidebar active
+    $$('.nav button').forEach(b=> b.classList.toggle('active', b.dataset.view===view));
+    // Sections
+    $('#dashboardView').style.display = (view==='dashboard')?'block':'none';
+    $('#inventoryView').style.display = (view==='inventory')?'block':'none';
+    $('#addView').style.display = (view==='add')?'block':'none';
+    $('#billingView').style.display = (view==='billing')?'block':'none';
+    if(view==='inventory') renderInventory();
+    if(view==='billing') refreshBillSelect();
+  }
+  function filterExpiringSoon(){
+    switchView('inventory');
+    currentFilter='expiring';
+    updateFilterPills();
+    renderInventory();
+  }
+  function updateFilterPills(){
+    $$('#inventoryView .pill').forEach(p=>{
+      if(p.dataset.filter){
+        p.classList.toggle('active', p.dataset.filter===currentFilter);
+      }
+    });
+  }
+
+  // ---------- Event bindings ----------
+  function bind(){
+    // Sidebar nav
+    $$('.nav button').forEach(btn=>{
+      btn.addEventListener('click', ()=> switchView(btn.dataset.view));
+    });
+
+    // Dark mode
+    $('#modeSwitch').addEventListener('click', toggleTheme);
+
+    // Dashboard tabs
+    $$('#dashboardView .tabs button').forEach(b=>{
+      b.addEventListener('click', ()=>{
+        $$('#dashboardView .tabs button').forEach(x=>x.classList.remove('active'));
+        b.classList.add('active');
+        const tab = b.dataset.dtab;
+        $('#recentTab').style.display = (tab==='recent')?'block':'none';
+        $('#quickTab').style.display = (tab==='quick')?'block':'none';
+      });
+    });
+
+    // Inventory controls
+    $('#searchBox').addEventListener('input', ()=> renderInventory());
+    $$('#inventoryView .pill').forEach(p=>{
+      if(p.dataset.filter){
+        p.addEventListener('click', ()=>{
+          currentFilter = p.dataset.filter;
+          updateFilterPills(); renderInventory();
+        });
+      }
+    });
+    $('#applyDate').addEventListener('click', ()=>{
+      dateFilter.from = $('#fromDate').value || null;
+      dateFilter.to = $('#toDate').value || null;
+      renderInventory();
+    });
+    $('#clearDate').addEventListener('click', ()=>{
+      $('#fromDate').value=''; $('#toDate').value='';
+      dateFilter = {from:null,to:null}; renderInventory();
+    });
+
+    // Add/Edit form
+    $('#f_exp').min = todayStr();
+    $('#medForm').addEventListener('submit', (e)=>{
+      e.preventDefault();
+      const m = captureForm();
+      // validation
+      if(new Date(m.exp) <= new Date()){ toast('Expiry must be in the future','err'); return; }
+      if(editingId){
+        const idx = medicines.findIndex(x=>x.id===editingId);
+        if(idx>-1) medicines[idx] = { ...medicines[idx], ...m };
+        toast('Medicine updated','ok');
+      } else {
+        medicines.push({ id: Date.now(), added:new Date().toISOString(), ...m });
+        toast('Medicine added','ok');
+      }
+      save(); resetForm(); refreshAll(); switchView('inventory');
+    });
+    $('#resetFormBtn').addEventListener('click', resetForm);
+    $('#cancelEdit').addEventListener('click', ()=>{ resetForm(); switchView('inventory'); });
+
+    // Billing
+    $('#billMed').addEventListener('change', updateAvail);
+    $('#addToCart').addEventListener('click', addItemToCart);
+    $('#finalize').addEventListener('click', finalizeBill);
+    $('#clearCart').addEventListener('click', clearCart);
+
+    // Backup/restore
+    $('#backupBtn').addEventListener('click', ()=>{
+      const blob = new Blob([JSON.stringify(medicines,null,2)], {type:'application/json'});
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href=url; a.download='medical_store_backup.json'; a.click();
+      URL.revokeObjectURL(url);
+    });
+    $('#restoreInput').addEventListener('change', async (e)=>{
+      const file = e.target.files[0]; if(!file) return;
+      const txt = await file.text();
+      try{
+        const data = JSON.parse(txt);
+        if(!Array.isArray(data)) throw new Error('Invalid data');
+        medicines = data; save(); refreshAll(); toast('Data imported','ok');
+      }catch(err){ toast('Import failed','err'); }
+      e.target.value='';
+    });
+
+    // Logout (demo)
+    $('#logoutBtn').addEventListener('click', ()=> toast('Logged out (demo)', 'warn'));
+  }
+
+  function refreshAll(){
+    updateStats();
+    renderAlerts();
+    renderRecent();
+    renderInventory();
+    refreshBillSelect();
+  }
+
+  // ---------- Init ----------
+  (function init(){
+    applyTheme();
+    load();
+    bind();
+    refreshAll();
+  })();
+</script>
+</body>
+</html>
+
+    

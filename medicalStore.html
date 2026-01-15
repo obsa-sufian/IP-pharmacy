@@ -1,0 +1,1056 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>pharmacy Store Management System</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.1);
+            overflow: hidden;
+            width: 100%;
+            max-width: 1400px;
+            min-height: 700px;
+            margin: 20px;
+        }
+
+        .login-section {
+            padding: 60px;
+            text-align: center;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+        }
+
+        .dashboard-section {
+            display: none;
+            padding: 40px;
+        }
+
+        .logo {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 50%;
+            margin: 0 auto 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 2rem;
+            font-weight: bold;
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 2.5rem;
+            font-weight: 600;
+        }
+
+        .subtitle {
+            color: #666;
+            margin-bottom: 40px;
+            font-size: 1.1rem;
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+            text-align: left;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: 500;
+        }
+
+        input, select, textarea {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #e1e5e9;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            background: #f8f9fa;
+        }
+
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: #667eea;
+            background: white;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.2);
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px 40px;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn-secondary {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            margin-right: 10px;
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #dc3545 0%, #e85d75 100%);
+        }
+
+        .dashboard-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #e1e5e9;
+        }
+
+        .welcome-text {
+            font-size: 1.8rem;
+            color: #333;
+            font-weight: 600;
+        }
+
+        /* Expiry Alert Section */
+        .expiry-alerts {
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
+            color: white;
+            padding: 25px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(255, 107, 107, 0.3);
+        }
+
+        .expiry-alerts h3 {
+            margin-bottom: 20px;
+            font-size: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .alert-icon {
+            font-size: 1.8rem;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+
+        .expiring-medicines {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+        }
+
+        .expiring-medicine {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 15px;
+            border-radius: 10px;
+            backdrop-filter: blur(10px);
+        }
+
+        .expiring-medicine-name {
+            font-weight: 600;
+            margin-bottom: 5px;
+            font-size: 1.1rem;
+        }
+
+        .expiring-medicine-details {
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+
+        .no-expiring {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            text-align: center;
+            font-size: 1.1rem;
+            font-weight: 600;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 25px;
+            border-radius: 15px;
+            text-align: center;
+            transition: transform 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .stat-number {
+            font-size: 2.5rem;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            font-size: 1rem;
+            opacity: 0.9;
+        }
+
+        .tabs {
+            display: flex;
+            margin-bottom: 30px;
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 5px;
+        }
+
+        .tab {
+            flex: 1;
+            padding: 15px 20px;
+            background: transparent;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            color: #666;
+        }
+
+        .tab.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+            animation: fadeIn 0.5s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .medicine-form {
+            background: #f8f9fa;
+            padding: 30px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .medicine-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 20px;
+        }
+
+        .medicine-card {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+            border-left: 5px solid #667eea;
+            position: relative;
+        }
+
+        .medicine-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.15);
+        }
+
+        .medicine-card.expiring-soon {
+            border-left-color: #ff6b6b;
+            background: linear-gradient(135deg, #fff5f5 0%, #ffe6e6 100%);
+        }
+
+        .medicine-name {
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .medicine-details {
+            color: #666;
+            margin-bottom: 5px;
+        }
+
+        .stock-status {
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            display: inline-block;
+            margin-top: 10px;
+        }
+
+        .in-stock {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .low-stock {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .out-of-stock {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .expiry-warning {
+            position: absolute;
+            top: -10px;
+            right: -10px;
+            background: #ff6b6b;
+            color: white;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            animation: pulse 2s infinite;
+        }
+
+        .search-box {
+            width: 100%;
+            max-width: 400px;
+            margin-bottom: 20px;
+            padding: 15px 20px;
+            border: 2px solid #e1e5e9;
+            border-radius: 25px;
+            font-size: 16px;
+            background: white;
+        }
+
+        .search-box:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .filter-buttons {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .filter-btn {
+            padding: 8px 20px;
+            border: 2px solid #e1e5e9;
+            background: white;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .filter-btn.active,
+        .filter-btn:hover {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+
+        .error-message {
+            color: #dc3545;
+            margin-top: 10px;
+            font-size: 14px;
+        }
+
+        .success-message {
+            color: #28a745;
+            margin-top: 10px;
+            font-size: 14px;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                margin: 10px;
+            }
+            
+            .login-section {
+                padding: 40px 30px;
+            }
+            
+            .dashboard-section {
+                padding: 20px;
+            }
+            
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+            
+            .dashboard-header {
+                flex-direction: column;
+                gap: 20px;
+                text-align: center;
+            }
+
+            .expiring-medicines {
+                grid-template-columns: 1fr;
+            }
+
+            .filter-buttons {
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Login Section -->
+        <div id="loginSection" class="login-section">
+            <div class="logo">M+</div>
+            <h1>Pharmacy Store</h1>
+            <p class="subtitle">Management System</p>
+            
+            <form id="loginForm">
+                <div class="form-group">
+                    <label for="username">Username</label>
+                    <input type="text" id="username" name="username" required>
+                </div>
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" name="password" required>
+                </div>
+                <div class="form-group">
+                    <button type="submit" class="btn">Login</button>
+                </div>
+                <div id="loginError" class="error-message"></div>
+            </form>
+        </div>
+
+        <!-- Dashboard Section -->
+        <div id="dashboardSection" class="dashboard-section">
+            <div className="dashboard-header">
+                <div class="welcome-text">Pharmacy Store Dashboard</div>
+                <button onclick="logout()" class="btn btn-danger">Logout</button>
+            </div>
+
+            <!-- Expiry Alerts Section -->
+            <div id="expiryAlertsSection"></div>
+
+            <!-- Stats Overview -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-number" id="totalMedicines">0</div>
+                    <div class="stat-label">Total Medicines</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="expiringCount">0</div>
+                    <div class="stat-label">Expiring This Month</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="lowStockCount">0</div>
+                    <div class="stat-label">Low Stock Items</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="outOfStockCount">0</div>
+                    <div class="stat-label">Out of Stock</div>
+                </div>
+            </div>
+
+            <!-- Tabs -->
+            <div class="tabs">
+                <button class="tab active" onclick="showTab('dashboard')">Dashboard</button>
+                <button class="tab" onclick="showTab('addMedicine')">Add Medicine</button>
+                <button class="tab" onclick="showTab('viewMedicines')">View All Medicines</button>
+            </div>
+
+            <!-- Dashboard Tab -->
+            <div id="dashboardTab" class="tab-content active">
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px;">
+                    <div>
+                        <h3 style="margin-bottom: 20px; color: #333;">Recent Medicines</h3>
+                        <div id="recentMedicines"></div>
+                    </div>
+                    <div>
+                        <h3 style="margin-bottom: 20px; color: #333;">Quick Actions</h3>
+                        <div style="display: flex; flex-direction: column; gap: 15px;">
+                            <button class="btn btn-secondary" onclick="showTab('addMedicine')">Add New Medicine</button>
+                            <button class="btn" onclick="showTab('viewMedicines')">View All Medicines</button>
+                            <button class="btn" onclick="showExpiringMedicines()">View Expiring Medicines</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Add Medicine Tab -->
+            <div id="addMedicineTab" class="tab-content">
+                <div class="medicine-form">
+                    <h2 style="margin-bottom: 25px; color: #333;">Add New Medicine</h2>
+                    <form id="medicineForm">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="medicineName">Medicine Name *</label>
+                                <input type="text" id="medicineName" name="medicineName" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="manufacturer">Manufacturer *</label>
+                                <input type="text" id="manufacturer" name="manufacturer" required>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="category">Category *</label>
+                                <select id="category" name="category" required>
+                                    <option value="">Select Category</option>
+                                    <option value="Tablet">Tablet</option>
+                                    <option value="Capsule">Capsule</option>
+                                    <option value="Syrup">Syrup</option>
+                                    <option value="Injection">Injection</option>
+                                    <option value="Cream/Ointment">Cream/Ointment</option>
+                                    <option value="Drop">Drop</option>
+                                    <option value="Inhaler">Inhaler</option>
+                                    <option value="Powder">Powder</option>
+                                    <option value="Other">Other</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="strength">Strength/Dosage *</label>
+                                <input type="text" id="strength" name="strength" placeholder="e.g., 500mg, 10ml, 5%" required>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="quantity">Quantity in Stock *</label>
+                                <input type="number" id="quantity" name="quantity" min="0" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="price">Price per Unit (birr) *</label>
+                                <input type="number" id="price" name="price" min="0" step="0.01" required>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="expiryDate">Expiry Date *</label>
+                                <input type="date" id="expiryDate" name="expiryDate" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="batchNumber">Batch Number *</label>
+                                <input type="text" id="batchNumber" name="batchNumber" required>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="description">Description (Optional)</label>
+                            <textarea id="description" name="description" rows="3" placeholder="Additional information about the medicine"></textarea>
+                        </div>
+                        <div class="form-group">
+                            <button type="submit" class="btn btn-secondary">Add Medicine</button>
+                            <button type="reset" class="btn">Clear Form</button>
+                        </div>
+                        <div id="medicineMessage"></div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- View Medicines Tab -->
+            <div id="viewMedicinesTab" class="tab-content">
+                <div style="margin-bottom: 20px;">
+                    <input type="text" class="search-box" id="searchBox" placeholder="Search medicines by name, manufacturer, or category...">
+                    <div class="filter-buttons">
+                        <button class="filter-btn active" onclick="filterMedicines('all')">All</button>
+                        <button class="filter-btn" onclick="filterMedicines('expiring')">Expiring Soon</button>
+                        <button class="filter-btn" onclick="filterMedicines('low-stock')">Low Stock</button>
+                        <button class="filter-btn" onclick="filterMedicines('out-of-stock')">Out of Stock</button>
+                    </div>
+                </div>
+                <div id="medicinesList" class="medicine-grid">
+                    <!-- Medicines will be displayed here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let medicines = [];
+        let currentUser = null;
+        let currentFilter = 'all';
+
+        // Default login credentials
+        const validCredentials = {
+            username: 'admin',
+            password: 'admin123'
+        };
+
+        // Login functionality
+        function handleLogin(e) {
+            if (e) e.preventDefault();
+            
+            const username = document.getElementById('username').value.trim();
+            const password = document.getElementById('password').value.trim();
+            const errorDiv = document.getElementById('loginError');
+
+            console.log('Login attempt:', username, password); // Debug log
+
+            if (username === validCredentials.username && password === validCredentials.password) {
+                currentUser = username;
+                document.getElementById('loginSection').style.display = 'none';
+                document.getElementById('dashboardSection').style.display = 'block';
+                updateDashboard();
+                errorDiv.textContent = '';
+                console.log('Login successful'); // Debug log
+            } else {
+                errorDiv.textContent = 'Invalid username or password. Use admin/admin123';
+                console.log('Login failed'); // Debug log
+            }
+        }
+
+        // Add event listener when DOM is ready
+        document.addEventListener('DOMContentLoaded', function() {
+            const loginForm = document.getElementById('loginForm');
+            if (loginForm) {
+                loginForm.addEventListener('submit', handleLogin);
+            }
+        });
+
+        // Logout functionality
+        function logout() {
+            currentUser = null;
+            document.getElementById('loginSection').style.display = 'block';
+            document.getElementById('dashboardSection').style.display = 'none';
+            document.getElementById('loginForm').reset();
+        }
+
+        // Tab switching
+        function showTab(tabName) {
+            // Hide all tabs
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+
+            // Show selected tab
+            document.getElementById(tabName + 'Tab').classList.add('active');
+            event.target.classList.add('active');
+
+            if (tabName === 'viewMedicines') {
+                displayMedicines();
+            } else if (tabName === 'dashboard') {
+                updateDashboard();
+            }
+        }
+
+        // Check if medicine is expiring within 30 days
+        function isExpiringWithinMonth(expiryDate) {
+            const today = new Date();
+            const expiry = new Date(expiryDate);
+            const daysToExpiry = Math.ceil((expiry - today) / (1000 * 60 * 60 * 24));
+            return daysToExpiry <= 30 && daysToExpiry > 0;
+        }
+
+        // Get medicines expiring within 30 days
+        function getExpiringMedicines() {
+            return medicines.filter(medicine => isExpiringWithinMonth(medicine.expiryDate));
+        }
+
+        // Display expiry alerts
+        function displayExpiryAlerts() {
+            const expiringMedicines = getExpiringMedicines();
+            const alertsSection = document.getElementById('expiryAlertsSection');
+
+            if (expiringMedicines.length === 0) {
+                alertsSection.innerHTML = `
+                    <div class="no-expiring">
+                        ✅ Great! No medicines are expiring in the next 30 days.
+                    </div>
+                `;
+                return;
+            }
+
+            alertsSection.innerHTML = `
+                <div class="expiry-alerts">
+                    <h3>
+                        <span class="alert-icon">⚠️</span>
+                        ${expiringMedicines.length} Medicine${expiringMedicines.length > 1 ? 's' : ''} Expiring This Month
+                    </h3>
+                    <div class="expiring-medicines">
+                        ${expiringMedicines.map(medicine => {
+                            const expiryDate = new Date(medicine.expiryDate);
+                            const today = new Date();
+                            const daysToExpiry = Math.ceil((expiryDate - today) / (1000 * 60 * 60 * 24));
+                            
+                            return `
+                                <div class="expiring-medicine">
+                                    <div class="expiring-medicine-name">${medicine.medicineName}</div>
+                                    <div class="expiring-medicine-details">
+                                        Expires in ${daysToExpiry} day${daysToExpiry > 1 ? 's' : ''}<br>
+                                        Quantity: ${medicine.quantity}<br>
+                                        Batch: ${medicine.batchNumber}
+                                    </div>
+                                </div>
+                            `;
+                        }).join('')}
+                    </div>
+                </div>
+            `;
+        }
+
+        // Add medicine functionality
+        function handleMedicineSubmit(e) {
+            if (e) e.preventDefault();
+            
+            const formData = new FormData(e.target);
+            const medicine = Object.fromEntries(formData.entries());
+            
+            // Add unique ID and timestamp
+            medicine.id = Date.now();
+            medicine.addedDate = new Date().toLocaleDateString();
+            
+            // Validate expiry date
+            const today = new Date();
+            const expiry = new Date(medicine.expiryDate);
+            if (expiry <= today) {
+                document.getElementById('medicineMessage').innerHTML = '<div class="error-message">Expiry date must be in the future</div>';
+                return;
+            }
+
+            medicines.push(medicine);
+            document.getElementById('medicineMessage').innerHTML = '<div class="success-message">Medicine added successfully!</div>';
+            e.target.reset();
+            updateDashboard();
+            
+            // Clear success message after 3 seconds
+            setTimeout(() => {
+                document.getElementById('medicineMessage').innerHTML = '';
+            }, 3000);
+        }
+
+        // Initialize when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('Page loaded'); // Debug log
+            
+            // Setup login form
+            const loginForm = document.getElementById('loginForm');
+            if (loginForm) {
+                loginForm.addEventListener('submit', handleLogin);
+                console.log('Login form listener added'); // Debug log
+            }
+
+            // Setup medicine form
+            const medicineForm = document.getElementById('medicineForm');
+            if (medicineForm) {
+                medicineForm.addEventListener('submit', handleMedicineSubmit);
+            }
+
+            // Setup search functionality
+            const searchBox = document.getElementById('searchBox');
+            if (searchBox) {
+                searchBox.addEventListener('input', function(e) {
+                    const searchTerm = e.target.value.toLowerCase();
+                    let filteredMedicines = medicines;
+
+                    // Apply current filter first
+                    switch(currentFilter) {
+                        case 'expiring':
+                            filteredMedicines = getExpiringMedicines();
+                            break;
+                        case 'low-stock':
+                            filteredMedicines = medicines.filter(m => parseInt(m.quantity) > 0 && parseInt(m.quantity) <= 10);
+                            break;
+                        case 'out-of-stock':
+                            filteredMedicines = medicines.filter(m => parseInt(m.quantity) === 0);
+                            break;
+                    }
+
+                    // Then apply search
+                    if (searchTerm) {
+                        filteredMedicines = filteredMedicines.filter(medicine => 
+                            medicine.medicineName.toLowerCase().includes(searchTerm) ||
+                            medicine.manufacturer.toLowerCase().includes(searchTerm) ||
+                            medicine.category.toLowerCase().includes(searchTerm) ||
+                            medicine.batchNumber.toLowerCase().includes(searchTerm)
+                        );
+                    }
+
+                    displayMedicines(filteredMedicines);
+                });
+            }
+
+            // Set minimum date for expiry date input to today
+            const expiryDateInput = document.getElementById('expiryDate');
+            if (expiryDateInput) {
+                expiryDateInput.min = new Date().toISOString().split('T')[0];
+            }
+        });
+
+        // Display medicines with enhanced styling
+        function displayMedicines(filteredMedicines = medicines) {
+            const medicinesList = document.getElementById('medicinesList');
+            
+            if (filteredMedicines.length === 0) {
+                medicinesList.innerHTML = '<div style="grid-column: 1/-1; text-align: center; padding: 40px; color: #666; font-size: 1.2rem;">No medicines found</div>';
+                return;
+            }
+
+            medicinesList.innerHTML = filteredMedicines.map(medicine => {
+                const quantity = parseInt(medicine.quantity);
+                let stockStatus = 'in-stock';
+                let stockText = 'In Stock';
+                
+                if (quantity === 0) {
+                    stockStatus = 'out-of-stock';
+                    stockText = 'Out of Stock';
+                } else if (quantity <= 10) {
+                    stockStatus = 'low-stock';
+                    stockText = 'Low Stock';
+                }
+
+                const expiryDate = new Date(medicine.expiryDate);
+                const today = new Date();
+                const daysToExpiry = Math.ceil((expiryDate - today) / (1000 * 60 * 60 * 24));
+                
+                let expiryWarning = '';
+                let cardClass = 'medicine-card';
+                let expiryIcon = '';
+                
+                if (daysToExpiry <= 30 && daysToExpiry > 0) {
+                    expiryWarning = `<div style="color: #dc3545; font-size: 0.9rem; margin-top: 5px; font-weight: 600;">⚠️ Expires in ${daysToExpiry} days</div>`;
+                    cardClass += ' expiring-soon';
+                    expiryIcon = '<div class="expiry-warning">⚠️</div>';
+                } else if (daysToExpiry <= 0) {
+                    expiryWarning = '<div style="color: #dc3545; font-size: 0.9rem; margin-top: 5px; font-weight: 600;">❌ Expired</div>';
+                    cardClass += ' expiring-soon';
+                    expiryIcon = '<div class="expiry-warning">❌</div>';
+                }
+
+                return `
+                    <div class="${cardClass}">
+                        ${expiryIcon}
+                        <div class="medicine-name">${medicine.medicineName}</div>
+                        <div class="medicine-details"><strong>Manufacturer:</strong> ${medicine.manufacturer}</div>
+                        <div class="medicine-details"><strong>Category:</strong> ${medicine.category}</div>
+                        <div class="medicine-details"><strong>Strength:</strong> ${medicine.strength}</div>
+                        <div class="medicine-details"><strong>Batch:</strong> ${medicine.batchNumber}</div>
+                        <div class="medicine-details"><strong>Price:</strong> ₹${medicine.price}</div>
+                        <div class="medicine-details"><strong>Quantity:</strong> ${medicine.quantity}</div>
+                        <div class="medicine-details"><strong>Expiry:</strong> ${new Date(medicine.expiryDate).toLocaleDateString()}</div>
+                        ${medicine.description ? `<div class="medicine-details"><strong>Description:</strong> ${medicine.description}</div>` : ''}
+                        <span class="stock-status ${stockStatus}">${stockText}</span>
+                        ${expiryWarning}
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // Filter medicines
+        function filterMedicines(filter) {
+            currentFilter = filter;
+            document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+
+            let filteredMedicines = medicines;
+
+            switch(filter) {
+                case 'expiring':
+                    filteredMedicines = getExpiringMedicines();
+                    break;
+        // Update statistics
+        function updateStats() {
+            document.getElementById('totalMedicines').textContent = medicines.length;
+            
+            const expiringCount = getExpiringMedicines().length;
+            document.getElementById('expiringCount').textContent = expiringCount;
+            
+            const lowStock = medicines.filter(m => parseInt(m.quantity) > 0 && parseInt(m.quantity) <= 10).length;
+            document.getElementById('lowStockCount').textContent = lowStock;
+            
+            const outOfStock = medicines.filter(m => parseInt(m.quantity) === 0).length;
+            document.getElementById('outOfStockCount').textContent = outOfStock;
+        }
+
+        // Display recent medicines on dashboard
+        function displayRecentMedicines() {
+            const recentMedicines = medicines
+                .sort((a, b) => b.id - a.id)
+                .slice(0, 5);
+
+            const recentContainer = document.getElementById('recentMedicines');
+
+            if (recentMedicines.length === 0) {
+                recentContainer.innerHTML = '<div style="text-align: center; color: #666; padding: 20px;">No medicines added yet</div>';
+                return;
+            }
+
+            recentContainer.innerHTML = recentMedicines.map(medicine => {
+                const isExpiring = isExpiringWithinMonth(medicine.expiryDate);
+                return `
+                    <div class="medicine-card ${isExpiring ? 'expiring-soon' : ''}" style="margin-bottom: 15px;">
+                        ${isExpiring ? '<div class="expiry-warning">⚠️</div>' : ''}
+                        <div class="medicine-name" style="font-size: 1.1rem;">${medicine.medicineName}</div>
+                        <div class="medicine-details">${medicine.manufacturer} | ${medicine.category}</div>
+                        <div class="medicine-details">Quantity: ${medicine.quantity} | ₹${medicine.price}</div>
+                        <div class="medicine-details">Expires: ${new Date(medicine.expiryDate).toLocaleDateString()}</div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // Update entire dashboard
+        function updateDashboard() {
+            displayExpiryAlerts();
+            updateStats();
+            displayRecentMedicines();
+            displayMedicines();
+        }
+
+        // Initialize with sample data
+        medicines = [
+            {
+                id: 1,
+                medicineName: "Paracetamol",
+                manufacturer: "Sun Pharma",
+                category: "Tablet",
+                strength: "500mg",
+                quantity: "150",
+                price: "2.50",
+                expiryDate: "2025-08-15", // Expires this month
+                batchNumber: "PAR123",
+                description: "Pain relief and fever reducer",
+                addedDate: new Date().toLocaleDateString()
+            },
+            {
+                id: 2,
+                medicineName: "Amoxicillin",
+                manufacturer: "Cipla",
+                category: "Capsule",
+                strength: "250mg",
+                quantity: "8",
+                price: "15.00",
+                expiryDate: "2025-08-25", // Expires this month
+                batchNumber: "AMX456",
+                description: "Antibiotic for bacterial infections",
+                addedDate: new Date().toLocaleDateString()
+            },
+            {
+                id: 3,
+                medicineName: "Cough Syrup",
+                manufacturer: "Himalaya",
+                category: "Syrup",
+                strength: "100ml",
+                quantity: "25",
+                price: "85.00",
+                expiryDate: "2025-12-31",
+                batchNumber: "CS789",
+                description: "Natural cough relief syrup",
+                addedDate: new Date().toLocaleDateString()
+            },
+            {
+                id: 4,
+                medicineName: "Vitamin D3",
+                manufacturer: "Cadila",
+                category: "Tablet",
+                strength: "1000 IU",
+                quantity: "0",
+                price: "12.00",
+                expiryDate: "2026-01-15",
+                batchNumber: "VD101",
+                description: "Vitamin D3 supplement",
+                addedDate: new Date().toLocaleDateString()
+            }
+        ];
+                case 'out-of-stock':
+                    filteredMedicines = medicines.filter(m => parseInt(m.quantity) === 0);
+                    break;
+                case 'all':
+                default:
+                    filteredMedicines = medicines;
+                    break;
+            }
+
+            displayMedicines(filteredMedicines);
+        }
+
+        // Show expiring medicines in view tab
+        function showExpiringMedicines() {
+            showTab('viewMedicines');
+            setTimeout(() => {
+                document.querySelector('.filter-btn[onclick="filterMedicines(\'expiring\')"]').click();
+            }, 100);
+        }
+
+        // Search functionality
+        // (Moved to DOMContentLoaded event listener above)
+
+        // Filter medicines
+        function filterMedicines(filter) {
+            currentFilter = filter;
+            document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+
+            let filteredMedicines = medicines;
+
+            switch(filter) {
+                case 'expiring':
+                    filteredMedicines = getExpiringMedicines();
+                    break;
+                case 'low-stock':
+                    filteredMedicines = medicines.filter(m => parseInt(m.quantity) > 0 && parseInt(m.quantity) <= 10);
+                    break;
+            }
+        }
+    </script>
+</body>
+</html>
