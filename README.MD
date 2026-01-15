@@ -84,9 +84,12 @@ Password: admin123
 
 
 ## REFERENCES:
--https://www.geeksforgeeks
--https://www.W3Schools
--https://www.tutorialspoint.com
+- https://www.geeksforgeeks.com/
+
+- https://www.W3Schools.com/
+
+- https://www.tutorialspoint.com/
+
 
 
 
