@@ -64,3 +64,11 @@ Password: admin123
 
  Integration with Hospital Management Systems (HMS)
 
+# Contributors
+https://github.com/obsa-sufian
+Lalise-Abera
+Umer-jemal
+Nanet-Buzayo
+Matheos-Million
+
+
