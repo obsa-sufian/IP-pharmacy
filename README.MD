@@ -65,8 +65,8 @@ Password: admin123
  Integration with Hospital Management Systems (HMS)
 
 # Contributors /GROUP MEMBERS
-#https://github.com/obsa-sufian
-#https://github.com/Matheos151
+## https://github.com/obsa-sufian
+## https://github.com/Matheos151
 
 
 
@@ -81,6 +81,7 @@ Password: admin123
 # 4. NANET BUZAYO.  RMD1963
 
 # 5. LALISE ABERA.  RMD1506
+
 
 
 
